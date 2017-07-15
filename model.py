@@ -4,9 +4,10 @@ from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 import cv2
 import numpy as np
-from keras.layers import Input, Flatten, Dense
+from keras.layers import Input, Flatten, Dense, Cropping2D, Lambda, Conv2D
 from keras.models import Model
 import matplotlib.pyplot as plt
+import time
 
 BATCH_SIZE = 32
 
@@ -30,49 +31,93 @@ def LoadData(testSize):
 
         return X_train, X_val, y_train, y_val
 
-def generator(X, y, batch_size=32):
+def MultCamAugm(X, y):
 
-    num_samples = len(X)
+    correction = 0.2
 
-    Xs, ys = shuffle(X, y)
+    Xa = []
+    ya = []
+
+    #Generate a flat list from left, Center and Right images
+    for images, angle in zip(X,y):
+
+        Xa.extend([images[0], images[1], images[2]])
+        ya.extend([ float(angle) + correction, float(angle), float(angle) - correction])
+
+    return Xa, ya
+
+def getImage(fileName):
+    # Read image
+    currentPath = os.path.join('./data/IMG/', fileName.split('/')[-1])
+    imgBGR = cv2.imread(currentPath)
+    return cv2.cvtColor(imgBGR, cv2.COLOR_BGR2RGB)
+
+
+def flipImage(image):
+    return cv2.flip(image, 1)
+
+
+def generator(X, y, augm = False, batch_size=32):
+
+    if augm == True:
+        Xa, ya = MultCamAugm(X, y)
+    else:
+        Xa = [i[1] for i in X]
+        ya = y
+
+    Xa, ya = shuffle(Xa, ya)
+
+    num_samples = len(Xa)
+    print("Number of samples = ", num_samples)
+
+    #sample_per_batch = int(batch_size/2)
 
     while 1:  # Loop forever so the generator never terminates
 
         for offset in range(0, num_samples, batch_size):
 
-            images_batch = Xs[offset:offset + batch_size]
-            angle_batch = ys[offset:offset + batch_size]
+            images_batch = Xa[offset:offset + batch_size]
+            angle_batch = ya[offset:offset + batch_size]
 
             images = []
             angles = []
 
-            for im, angle in zip(images_batch, angle_batch):
-
-                #Read image
-                currentPath = os.path.join('./data/IMG/', im[1].split('/')[-1])
-                center_image = cv2.imread(currentPath)
-                images.append(center_image)
-
-                #Read angle
-                center_angle = float(angle)
-                angles.append(center_angle)
+            for im, angle in zip(imagesimport time_batch, angle_batch):
+                #print("Image = ", im, "   Angle = ", angle)
+                #Load original images
+                image = getImage(im)
+                images.append(image)
+                angles.append(float(angle))
 
             # Transform to np.arrays
             X_batch = np.array(images)
             y_batch = np.array(angles)
 
-            #TODO: perform any transformation here before output
 
-            yield X_batch, y_batch
+            yield shuffle(X_batch, y_batch)
 
 def modelDefintion():
 
     input_shape = (160, 320, 3)
     inp = Input(shape=input_shape)
-    x = Flatten()(inp)
+
+    x = Lambda(lambda x: x / 127.5 - 1.)(inp)
+    x = Cropping2D(cropping=((50,20), (0,0)))(x)
+    x = Conv2D(24, 5, 5, activation='relu', subsample=(2,2))(x)
+    x = Conv2D(36, 5, 5, activation='relu', subsample=(2,2))(x)
+    x = Conv2D(48, 5, 5, activation='relu', subsample=(2,2))(x)
+    x = Conv2D(64, 3, 3, activation='relu')(x)
+    x = Conv2D(64, 3, 3, activation='relu')(x)
+    x = Flatten()(x)
+    x = Dense(100)(x)
+    x = Dense(50)(x)
+    x = Dense(10)(x)
     x = Dense(1)(x)
 
-    return Model(inp, x)
+    m = Model(inp, x)
+    m.summary()
+
+    return m
 
 def plotLoss(obj):
     ### print the keys contained in the history object
@@ -93,22 +138,23 @@ def main():
     #Load the file names for the train and validation features
     X_train, X_val, y_train, y_val = LoadData(testSize = 0.2)
 
-    print("Number of samples = ", len(X_train))
-
     model = modelDefintion()
 
     model.compile(loss = 'mse', optimizer='adam')
 
-    train_generator = generator(X_train, y_train, batch_size = BATCH_SIZE)
+    train_generator = generator(X_train, y_train, augm = True, batch_size = BATCH_SIZE)
     validation_generator = generator(X_val, y_val, batch_size = BATCH_SIZE)
 
-    historyObj = model.fit_generator(train_generator, steps_per_epoch = len(X_train)/BATCH_SIZE, epochs = 3, verbose = 2,
-                                     validation_data = validation_generator, validation_steps = len(X_val)/BATCH_SIZE)
+    t0 = time.time()
+
+    historyObj = model.fit_generator(train_generator, steps_per_epoch = 3*len(X_train)/BATCH_SIZE, epochs = 5, verbose = 2,
+                                  validation_data = validation_generator, validation_steps = len(X_val)/BATCH_SIZE)
+
+    print("Time: %.3f seconds" % (time.time() - t0))
 
     model.save('model.h5')
 
     plotLoss(historyObj)
-
 
 
 if __name__ == '__main__':
