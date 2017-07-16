@@ -18,18 +18,23 @@ EPOCHS = 3
 def LoadData(testSize = 0.2):
     # https://docs.python.org/3/library/csv.html#csv.reader
     # http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
-
+    print("Loading data from: ", data_dir)
     currentPath = os.path.join(data_dir, 'driving_log.csv')
 
     X_train = []
     y_train = []
 
     with open(currentPath, newline='') as csvFile:
-        csvReader = csv.DictReader(csvFile)
+        csvReader = csv.reader(csvFile)
 
         for row in csvReader:
-            X_train.append([row['left'], row['center'], row['right']])
-            y_train.append(row['steering'])
+            #skip header
+            if(row[0] == 'center'):
+                next(csvReader)
+            else:
+                X_train.append([row[0], row[1], row[2]])
+                y_train.append(row[3])
+
 
         X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size = testSize)
 
@@ -52,7 +57,7 @@ def MultCamAugm(X, y):
     for images, angle in zip(X,y):
 
         Xa.extend([images[0], images[1], images[2]])
-        ya.extend([ float(angle) + correction, float(angle), float(angle) - correction])
+        ya.extend([ float(angle), float(angle) + correction, float(angle) - correction])
 
     return Xa, ya
 
@@ -62,10 +67,6 @@ def getImage(fileName):
     imgBGR = cv2.imread(currentPath)
     #imgBGR = cv2.resize(imgBGR, (0, 0), fx=0.5, fy=0.5)
     return cv2.cvtColor(imgBGR, cv2.COLOR_BGR2RGB)
-
-
-def flipImage(image):
-    return cv2.flip(image, 1)
 
 
 def generator(X, y, augm = False, batch_size=32):
@@ -81,7 +82,7 @@ def generator(X, y, augm = False, batch_size=32):
     if augm == True:
         Xa, ya = MultCamAugm(X, y)
     else:
-        Xa = [i[1] for i in X]
+        Xa = [i[0] for i in X]
         ya = y
 
     Xa, ya = shuffle(Xa, ya)
@@ -197,18 +198,18 @@ def main():
     parser = argparse.ArgumentParser(description='Behavioral Cloning P3')
     parser.add_argument('-d',    '--data_dir',        help='train data directory',       default='./data')
     parser.add_argument('-sf',   '--model_save_file', help='file to save the model',     default='model.h5')
-    parser.add_argument('-ft',   '--fine_tuning',     help='fine tuning option',         default= False)
-    parser.add_argument('-d_ft', '--ft_data_dir',     help='fine tuning data directory', default='./data')
+    parser.add_argument('-ft',   '--fine_tuning',     help='fine tuning option',         default='False')
     parser.add_argument('-lf',   '--model_load_file', help='fine tuning data directory', default='model.h5')
-
     args = parser.parse_args()
+
+    if True:
+        print(args.data_dir)
+        print(args.model_save_file)
+        print(args.fine_tuning)
+        print(args.model_load_file)
 
     global data_dir
     data_dir = args.data_dir
-
-    #Check fine tuning operation
-    if str2bool(args.fine_tuning) == True:
-        data_dir = args.ft_data_dir
 
     #Load the file names for the train and validation features
     X_train, X_val, y_train, y_val = LoadData(testSize = 0.2)
