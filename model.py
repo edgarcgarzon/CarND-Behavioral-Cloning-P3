@@ -46,10 +46,25 @@ def MultCamAugm(X, y):
 
     return Xa, ya
 
+def FlipAugm(X, y):
+
+    Xa = []
+    ya = []
+
+    #Generate a flat list from left, Center and Right images
+    for images, angle in zip(X,y):
+
+        Xa.extend([images[0], images[1], images[2]])
+        ya.extend([ float(angle) + correction, float(angle), float(angle) - correction])
+
+    return Xa, ya
+
+
 def getImage(fileName):
     # Read image
     currentPath = os.path.join('./data/IMG/', fileName.split('/')[-1])
     imgBGR = cv2.imread(currentPath)
+    #imgBGR = cv2.resize(imgBGR, (0, 0), fx=0.5, fy=0.5)
     return cv2.cvtColor(imgBGR, cv2.COLOR_BGR2RGB)
 
 
@@ -70,8 +85,6 @@ def generator(X, y, augm = False, batch_size=32):
     num_samples = len(Xa)
     print("Number of samples = ", num_samples)
 
-    #sample_per_batch = int(batch_size/2)
-
     while 1:  # Loop forever so the generator never terminates
 
         for offset in range(0, num_samples, batch_size):
@@ -82,7 +95,7 @@ def generator(X, y, augm = False, batch_size=32):
             images = []
             angles = []
 
-            for im, angle in zip(imagesimport time_batch, angle_batch):
+            for im, angle in zip(images_batch, angle_batch):
                 #print("Image = ", im, "   Angle = ", angle)
                 #Load original images
                 image = getImage(im)
@@ -143,12 +156,16 @@ def main():
     model.compile(loss = 'mse', optimizer='adam')
 
     train_generator = generator(X_train, y_train, augm = True, batch_size = BATCH_SIZE)
-    validation_generator = generator(X_val, y_val, batch_size = BATCH_SIZE)
+    validation_generator = generator(X_val, y_val, augm = True, batch_size = BATCH_SIZE)
 
     t0 = time.time()
 
-    historyObj = model.fit_generator(train_generator, steps_per_epoch = 3*len(X_train)/BATCH_SIZE, epochs = 5, verbose = 2,
-                                  validation_data = validation_generator, validation_steps = len(X_val)/BATCH_SIZE)
+    stepsPerEpoch = 3*len(X_train)/BATCH_SIZE
+    validationSteps = len(X_val)/BATCH_SIZE
+    EPOCHS = 3
+
+    historyObj = model.fit_generator(train_generator, steps_per_epoch = stepsPerEpoch, epochs = EPOCHS, verbose = 2,
+                                  validation_data = validation_generator, validation_steps = validationSteps)
 
     print("Time: %.3f seconds" % (time.time() - t0))
 
