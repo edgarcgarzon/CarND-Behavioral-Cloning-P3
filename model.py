@@ -4,7 +4,7 @@ from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 import cv2
 import numpy as np
-from keras.layers import Input, Flatten, Dense, Cropping2D, Lambda, Conv2D
+from keras.layers import Input, Flatten, Dense, Cropping2D, Lambda, Conv2D, Dropout
 from keras.models import Model
 import matplotlib.pyplot as plt
 import time
@@ -88,7 +88,7 @@ def generator(X, y, augm = False, batch_size=32):
     Xa, ya = shuffle(Xa, ya)
 
     num_samples = len(Xa)
-    print("Number of samples = ", num_samples)
+    print("\nNumber of samples = ", num_samples)
 
     while 1:  # Loop forever so the generator never terminates
 
@@ -125,11 +125,12 @@ def modelDefintion():
 
     x = Lambda(lambda x: x / 127.5 - 1.)(inp)
     x = Cropping2D(cropping=((50,20), (0,0)))(x)
-    x = Conv2D(24, 5, 5, activation='relu', subsample=(2,2))(x)
-    x = Conv2D(36, 5, 5, activation='relu', subsample=(2,2))(x)
-    x = Conv2D(48, 5, 5, activation='relu', subsample=(2,2))(x)
-    x = Conv2D(64, 3, 3, activation='relu')(x)
-    x = Conv2D(64, 3, 3, activation='relu')(x)
+    x = Conv2D(24, (5, 5), activation='relu', strides=(2,2))(x)
+    x = Conv2D(36, (5, 5), activation='relu', strides=(2,2))(x)
+    x = Conv2D(48, (5, 5), activation='relu', strides=(2,2))(x)
+    x = Conv2D(64, (3, 3), activation='relu')(x)
+    x = Conv2D(64, (3, 3), activation='relu')(x)
+    x = Dropout(0.5)(x)
     x = Flatten()(x)
     x = Dense(100, activation='relu')(x)
     x = Dense(50, activation='relu')(x)
