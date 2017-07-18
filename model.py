@@ -12,7 +12,7 @@ import argparse
 
 BATCH_SIZE = 128
 data_dir = ''
-EPOCHS = 3
+
 
 
 def LoadData(testSize = 0.2):
@@ -199,18 +199,15 @@ def main():
     parser = argparse.ArgumentParser(description='Behavioral Cloning P3')
     parser.add_argument('-d',    '--data_dir',        help='train data directory',       default='./data')
     parser.add_argument('-sf',   '--model_save_file', help='file to save the model',     default='model.h5')
+    parser.add_argument('-e',    '--epochs',          help='epochs number',              default='3')
     parser.add_argument('-ft',   '--fine_tuning',     help='fine tuning option',         default='False')
     parser.add_argument('-lf',   '--model_load_file', help='fine tuning data directory', default='model.h5')
     args = parser.parse_args()
 
-    if True:
-        print(args.data_dir)
-        print(args.model_save_file)
-        print(args.fine_tuning)
-        print(args.model_load_file)
-
     global data_dir
     data_dir = args.data_dir
+    epochs = int(args.epochs)
+    print(epochs)
 
     #Load the file names for the train and validation features
     X_train, X_val, y_train, y_val = LoadData(testSize = 0.2)
@@ -235,8 +232,8 @@ def main():
     validationSteps = len(X_val)/BATCH_SIZE    # The validation data is keep to the original size
 
     #Train the model
-    historyObj = model.fit_generator(train_generator, steps_per_epoch = stepsPerEpoch, epochs = EPOCHS, verbose = 1,
-                                  validation_data = validation_generator, validation_steps = validationSteps)
+    historyObj = model.fit_generator(train_generator, steps_per_epoch = stepsPerEpoch, epochs = epochs, verbose = 1,
+                                     validation_data = validation_generator, validation_steps = validationSteps)
 
     print("Time: %.3f seconds" % (time.time() - t0))
 
