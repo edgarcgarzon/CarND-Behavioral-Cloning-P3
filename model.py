@@ -201,7 +201,7 @@ def main():
     parser.add_argument('-sf',   '--model_save_file', help='file to save the model',     default='model.h5')
     parser.add_argument('-e',    '--epochs',          help='epochs number',              default='3')
     parser.add_argument('-ft',   '--fine_tuning',     help='fine tuning option',         default='False')
-    parser.add_argument('-lf',   '--model_load_file', help='fine tuning data directory', default='model.h5')
+    parser.add_argument('-lf',   '--model_load_file', help='file to load the base model',default='model.h5')
     args = parser.parse_args()
 
     global data_dir
