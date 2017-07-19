@@ -122,9 +122,9 @@ The model contains dropout layers in order to reduce overfitting.
 
 The model was trained and validated on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
-Without dropout | With dropout
-- | - 
-<img src="./examples/T1_First_training_no_dropout.png" width="300">| <img src="./examples/T1_First_training.png" width="300">
+| Without dropout | With dropout |
+| - | - | 
+| <img src="./examples/T1_First_training_no_dropout.png" width="300">| <img src="./examples/T1_First_training.png" width="300"> |
 
 
 #### 3. Model parameter tuning
@@ -140,15 +140,15 @@ Training data was chosen to keep the vehicle driving in the center of the road f
 During the training phase 3 images were capture corresponding to a center camera, a left camera and right camera. 
 In order to have more data to train the model, the 3 images were used. The new labels to the left and right images were calculated from the steering angle of the center camera by applying a correction factor.
 
-Image right (angle = 0.57 - 0.2) | Image center (angle = 0.57) | Image left (angle 0.57 + 0.2)
-- | - | -
-<img src="./examples/right.jpg" width="200">| <img src="./examples/center.jpg"" width="200">|<img src="./examples/left.jpg"" width="200">
+|Image right (angle = 0.57 - 0.2) | Image center (angle = 0.57) | Image left (angle 0.57 + 0.2)|
+|- | - | - |
+|<img src="./examples/right.jpg" width="200">| <img src="./examples/center.jpg" width="200"> |<img src="./examples/left.jpg" width="200"> |
 
 Other transformatin apply was to crop the image to train the network only with more relevant information. By cropping the image the front of the car and the sky is removed.
 
-Original | Crop
-- | - 
-<img src="./examples/center.jpg" width="200">| <img src="./examples/crop.png"" width="200">
+|Original | Crop |
+| - | - |
+|<img src="./examples/center.jpg" width="200">| <img src="./examples/crop.png" width="200"> |
 
 #### 5. Transfer learning
 
@@ -175,9 +175,9 @@ Retrained the model using the new data:
 ```
 The inital data was the one provided by Udacity in [link](https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip). The new data was created using the simulator in the training mode for 3 laps driving in the opposite sense. The biggest improvement in using the new data is that the car in the sharpest curves is more center.
 
-First training | Final training
-- | - 
-<img src="./examples/FirstTrainingCurve1.png" width="200">| <img src="./examples/FinalTraingCurve.png"" width="200">
+|First training | Final training|
+|- | -| 
+|<img src="./examples/FirstTrainingCurve1.png" width="200"> | <img src="./examples/FinalTraingCurve.png" width="200"> |
 
 Note that the new data should be big enough to not loss model acuracy. Using small data to retrined the model makes the model to overfit.
 
