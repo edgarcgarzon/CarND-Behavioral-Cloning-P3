@@ -90,7 +90,13 @@ The model.py file contains the code for training and saving the convolution neur
 
 #### 1. Architecture
 
-The model is the [NVIDIA CNN network](https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/):
+All the training pipeline was test using  simple network of 1 fully connected layer. This was done to validate the pipeline: data acquisition, data split for validation, generators, optimizer and results visualization. Setting up the enviroment using a simple network shows-up easier and faster errors in the pipeline. 
+
+The model chossen to trained the network was the NVIDIA CNN due it was already tested with good results solving similar problems as the one proposed in this project. There are only 2 parameters to tune: number of epochs and batch size. The number of epochs were tune to 3 due after epoch number 3 the loss flat and in some cases the model was overfitting. The batch size was tuned to 128 and it was chosen because the harware limitation were the model was trained: [Nvidia GeForce 840M](https://www.geforce.com/hardware/notebook-gpus/geforce-840m). Changing the batch size does not impact the performance of the model. 
+
+The most important design change introduced to the model is the dropout layer after the convolutional layers. The rate was set to 0.5, however other values were tested and not particulary changes could be observed in the model performance. 
+
+[NVIDIA CNN network](https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/):
 
 
 | Layer (type)                 |Output Shape            | Param #  |            Note  |
@@ -192,7 +198,7 @@ This is an example of retrained the model for the montain track with a small dat
 
 ## **Results**
 
-* The NVIDIA mode is really powerful nd acure for this kind of predictions. It shows a really good results without making too much effort in the image preprocessing or data augementation.
+* The NVIDIA mode is really powerful and acurate for this kind of predictions. It shows a really good results without making too much effort in the image preprocessing or data augementation. Fro experimentation it seems that even with to few training data the model was already capable of predicts with enough accuracy to makes the car go through the tracks.
 * Using Keras library instead of tensorflow makes the implementation phase much faster, clear and with less bugs.
 
 ## **TODO**
