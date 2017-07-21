@@ -203,7 +203,12 @@ This is an example of retrained the model for the montain track with a small dat
 
 ## **TODO**
 * Generate one model capable of drive both tracks.
-
+* Use [batch normalization](https://keras.io/layers/normalization/) [(example)](https://stackoverflow.com/questions/34716454/where-do-i-call-the-batchnormalization-function-in-keras)
+* Introduce more dropout nodes [(a word about dropout)](http://machinelearningmastery.com/dropout-regularization-deep-learning-models-keras/)
+* Evaluate the data before training the network and use augmentation technics to normalizes it [(a word about validation and test)](https://www.coursera.org/learn/machine-learning/lecture/QGKbr/model-selection-and-train-validation-test-sets) [(display with).](http://matplotlib.org/1.2.1/examples/pylab_examples/histogram_demo.html)
+* Use crossvalidaiton technics (sklearn function: [StratifiedShuffleSplit)](http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit.html)
+* Add [Early Stopping](https://keras.io/callbacks/#callback) and [model Checkpoint](https://keras.io/callbacks/#modelcheckpoint).
+* Add [Keras visulatizaion](https://keras.io/visualization/)
 
 
 
